@@ -1,11 +1,11 @@
 import { checkAtk, checkPosition } from './functions.js';
 import {
 	GRAVITY,
-	ENEMY_MOVES,
+	PLAYER2_MOVES,
 	JUMP_FORCE,
 	KEYS,
 	MOVE_SPEED,
-	PLAYER_MOVES,
+	PLAYER1_MOVES,
 	HEALTH_BAR_WIDTH,
 	HEALTH_BAR_HEIGHT,
 	ATK_BOX_WIDTH,
@@ -15,8 +15,8 @@ import {
 	ATK_OFFSET,
 	CANVAS_WIDTH,
 	CANVAS_HEIGHT,
-	PLAYER_SPRITE,
-	ENEMY_SPRITE,
+	PLAYER1_SPRITE,
+	PLAYER2_SPRITE,
 } from './constants.js';
 
 let gameOver = false;
@@ -63,6 +63,7 @@ class Sprite {
 			height: HEALTH_BAR_HEIGHT,
 		};
 		this.imune = false;
+		this.moveLock = false;
 	}
 
 	draw() {
@@ -104,11 +105,18 @@ class Sprite {
 		this.atkbox.position.y = this.position.y;
 
 		if (this.position.y + this.height >= canvas.height) {
-			this.velocity.y = 0;
 			this.position.y = canvas.height - this.height;
+			this.velocity.y = 0;
 			this.jumpLock = false;
+			this.moveLock = false;
 		} else {
 			this.velocity.y += GRAVITY;
+		}
+
+		if (this.position.x <= 0) {
+			this.position.x = 0;
+		} else if (this.position.x >= canvas.width - this.width) {
+			this.position.x = canvas.width - this.width;
 		}
 	}
 
@@ -120,8 +128,8 @@ class Sprite {
 	}
 }
 
-const player = new Sprite(PLAYER_SPRITE);
-const enemy = new Sprite(ENEMY_SPRITE);
+const player1 = new Sprite(PLAYER1_SPRITE);
+const player2 = new Sprite(PLAYER2_SPRITE);
 
 let timer = 30;
 const timerEl = document.querySelector('#timer');
@@ -140,60 +148,81 @@ function animate() {
 	window.requestAnimationFrame(animate);
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	player.update();
-	enemy.update();
 
-	player.velocity.x = 0;
-	enemy.velocity.x = 0;
+	player1.update();
+	player2.update();
+
+	if (!player1.moveLock) player1.velocity.x = 0;
+	if (!player2.moveLock) player2.velocity.x = 0;
 
 	if (!gameOver) {
-		if (KEYS.a.pressed && player.lastKey === 'a' && player.position.x >= 0) {
-			player.velocity.x = -MOVE_SPEED;
-		} else if (KEYS.d.pressed && player.lastKey === 'd' && player.position.x + player.width <= canvas.width) {
-			player.velocity.x = MOVE_SPEED;
+		if (KEYS.a.pressed && player1.lastKey === 'a' && !player1.moveLock) {
+			player1.velocity.x = -MOVE_SPEED;
+		} else if (KEYS.d.pressed && player1.lastKey === 'd' && !player1.moveLock) {
+			player1.velocity.x = MOVE_SPEED;
 		}
 
-		if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft' && enemy.position.x >= 0) {
-			enemy.velocity.x = -MOVE_SPEED;
-		} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight' && enemy.position.x + enemy.width <= canvas.width) {
-			enemy.velocity.x = MOVE_SPEED;
+		if (KEYS.ArrowLeft.pressed && player2.lastKey === 'ArrowLeft' && !player2.moveLock) {
+			player2.velocity.x = -MOVE_SPEED;
+		} else if (KEYS.ArrowRight.pressed && player2.lastKey === 'ArrowRight' && !player2.moveLock) {
+			player2.velocity.x = MOVE_SPEED;
 		}
 
-		if (KEYS.w.pressed && !player.jumpLock) {
-			player.velocity.y = JUMP_FORCE;
-			player.jumpLock = true;
-		} if (KEYS.ArrowUp.pressed && !enemy.jumpLock) {
-			enemy.velocity.y = JUMP_FORCE;
-			enemy.jumpLock = true;
+		if (KEYS.w.pressed && !player1.jumpLock) {
+			player1.velocity.y = JUMP_FORCE;
+			player1.jumpLock = true;
+		} if (KEYS.ArrowUp.pressed && !player2.jumpLock) {
+			player2.velocity.y = JUMP_FORCE;
+			player2.jumpLock = true;
 		}
 
-		if (checkAtk(player, enemy) && player.isAttacking) {
-			player.isAttacking = false;
+		if (checkAtk(player1, player2) && player1.isAttacking) {
+			player1.isAttacking = false;
 
-			if (enemy.health > 0 && !enemy.imune) {
-				enemy.health -= 10;
-				enemy.imune = true;
+			if (player2.health > 0 && !player2.imune) {
+				player2.health -= 10;
+
+				player2.moveLock = true;
+				player2.jumpLock = true;
+				player2.velocity.y = -10;
+
+				if (checkPosition(player2, player1))
+					player2.velocity.x += 20;
+				else
+					player2.velocity.x -= 20;
+
+				player2.imune = true;
 				setTimeout(() => {
-					enemy.imune = false;
+					player2.imune = false;
 				}, 250);
 			}
 
-			if (enemy.health === 0) {
+			if (player2.health === 0) {
 				gameOver = true;
 				document.querySelector('#player1-wins').style.display = 'flex'
 			}
-		} if (checkAtk(enemy, player) && enemy.isAttacking) {
-			enemy.isAttacking = false;
+		} if (checkAtk(player2, player1) && player2.isAttacking) {
+			player2.isAttacking = false;
 
-			if (player.health > 0 && !player.imune) {
-				player.health -= 10;
-				player.imune = true;
+			if (player1.health > 0 && !player1.imune) {
+				player1.health -= 10;
+
+				player1.moveLock = true;
+				player1.jumpLock = true;
+				player1.velocity.y = -10;
+
+				if (checkPosition(player1, player2))
+					player1.velocity.x += 20;
+				else
+					player1.velocity.x -= 20;
+
+				player1.imune = true;
 				setTimeout(() => {
-					player.imune = false;
+					player1.imune = false;
 				}, 250);
 			}
 
-			if (player.health === 0) {
+			if (player1.health === 0) {
 				gameOver = true;
 				document.querySelector('#player2-wins').style.display = 'flex';
 			}
@@ -202,25 +231,25 @@ function animate() {
 		if (timer === 0 && !gameOver) {
 			gameOver = true;
 
-			if (player.health > enemy.health)
+			if (player1.health > player2.health)
 				document.querySelector('#player1-wins').style.display = 'flex';
-			else if (enemy.health > player.health)
+			else if (player2.health > player1.health)
 				document.querySelector('#player2-wins').style.display = 'flex';
 			else
 				document.querySelector('#tie').style.display = 'flex';
 		}
 	}
 
-	if (checkPosition(player, enemy)) {
-		player.atkbox.offset.x = ATK_OFFSET;
+	if (checkPosition(player1, player2)) {
+		player1.atkbox.offset.x = ATK_OFFSET;
 	} else {
-		player.atkbox.offset.x = 0;
+		player1.atkbox.offset.x = 0;
 	}
 
-	if (checkPosition(enemy, player)) {
-		enemy.atkbox.offset.x = ATK_OFFSET;
+	if (checkPosition(player2, player1)) {
+		player2.atkbox.offset.x = ATK_OFFSET;
 	} else {
-		enemy.atkbox.offset.x = 0;
+		player2.atkbox.offset.x = 0;
 	}
 }
 
@@ -228,25 +257,25 @@ decreaseTimer();
 animate();
 
 window.addEventListener('keydown', event => {
-	if (PLAYER_MOVES.includes(event.key)) {
+	if (PLAYER1_MOVES.includes(event.key)) {
 		KEYS[event.key].pressed = true;
 		if (event.key !== 'w' && event.key !== 's') {
-			player.lastKey = event.key;
+			player1.lastKey = event.key;
 		} if (event.key === 's' && !gameOver) {
-			player.attack();
+			player1.attack();
 		}
-	} else if (ENEMY_MOVES.includes(event.key)) {
+	} else if (PLAYER2_MOVES.includes(event.key)) {
 		KEYS[event.key].pressed = true;
 		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-			enemy.lastKey = event.key;
+			player2.lastKey = event.key;
 		} if (event.key === 'ArrowDown' && !gameOver) {
-			enemy.attack();
+			player2.attack();
 		}
 	}
 });
 
 window.addEventListener('keyup', event => {
-	if (PLAYER_MOVES.includes(event.key) || ENEMY_MOVES.includes(event.key)) {
+	if (PLAYER1_MOVES.includes(event.key) || PLAYER2_MOVES.includes(event.key)) {
 		KEYS[event.key].pressed = false;
 	}
 });

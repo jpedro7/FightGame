@@ -1,26 +1,26 @@
 // Moves
-export const PLAYER_MOVES = ['a', 'd', 'w', 's'];
-export const ENEMY_MOVES = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+export const PLAYER1_MOVES = ['a', 'd', 'w', 's'];
+export const PLAYER2_MOVES = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
 export const KEYS = {
+	'w': {
+		pressed: false,
+	},
     'a': {
         pressed: false,
     },
     'd': {
         pressed: false,
     },
-    'w': {
-        pressed: false,
-    },
+	's': {
+		pressed: false,
+	},
+	'ArrowUp': {
+		pressed: false,
+	},
     'ArrowLeft': {
         pressed: false,
     },
     'ArrowRight': {
-        pressed: false,
-    },
-    'ArrowUp': {
-        pressed: false,
-    },
-    's': {
         pressed: false,
     },
     'ArrowDown': {
@@ -45,7 +45,7 @@ export const ATK_BOX_HEIGHT = 50;
 export const ATK_OFFSET = 50;
 
 // Sprites
-export const PLAYER_SPRITE = {
+export const PLAYER1_SPRITE = {
 	position: {
 		x: 0,
 		y: CANVAS_HEIGHT - SPRITE_HEIGHT,
@@ -65,7 +65,7 @@ export const PLAYER_SPRITE = {
 		direction: 'left',
 	},
 }
-export const ENEMY_SPRITE = {
+export const PLAYER2_SPRITE = {
 	position: {
 		x: CANVAS_WIDTH - SPRITE_WIDTH,
 		y: CANVAS_HEIGHT - SPRITE_HEIGHT,
