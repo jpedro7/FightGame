@@ -1,5 +1,7 @@
 # Fight Game Insctructions
 
+To play again, reload the page.
+
 ## Player 1 commands:
 W - Jump  
 A - Move Left  
