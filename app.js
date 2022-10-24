@@ -152,13 +152,13 @@ function animate() {
 		} else if (KEYS.d.pressed && player.lastKey === 'd' && player.position.x + player.width <= canvas.width) {
 			player.velocity.x = MOVE_SPEED;
 		}
-	
+
 		if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft' && enemy.position.x >= 0) {
 			enemy.velocity.x = -MOVE_SPEED;
 		} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight' && enemy.position.x + enemy.width <= canvas.width) {
 			enemy.velocity.x = MOVE_SPEED;
 		}
-	
+
 		if (KEYS.w.pressed && !player.jumpLock) {
 			player.velocity.y = JUMP_FORCE;
 			player.jumpLock = true;
@@ -166,10 +166,10 @@ function animate() {
 			enemy.velocity.y = JUMP_FORCE;
 			enemy.jumpLock = true;
 		}
-	
+
 		if (checkAtk(player, enemy) && player.isAttacking) {
 			player.isAttacking = false;
-			
+
 			if (enemy.health > 0 && !enemy.imune) {
 				enemy.health -= 10;
 				enemy.imune = true;
@@ -177,14 +177,14 @@ function animate() {
 					enemy.imune = false;
 				}, 250);
 			}
-			
+
 			if (enemy.health === 0) {
 				gameOver = true;
 				document.querySelector('#player1-wins').style.display = 'flex'
 			}
 		} if (checkAtk(enemy, player) && enemy.isAttacking) {
 			enemy.isAttacking = false;
-	
+
 			if (player.health > 0 && !player.imune) {
 				player.health -= 10;
 				player.imune = true;
@@ -192,16 +192,16 @@ function animate() {
 					player.imune = false;
 				}, 250);
 			}
-			
+
 			if (player.health === 0) {
 				gameOver = true;
 				document.querySelector('#player2-wins').style.display = 'flex';
 			}
 		}
-	
+
 		if (timer === 0 && !gameOver) {
 			gameOver = true;
-	
+
 			if (player.health > enemy.health)
 				document.querySelector('#player1-wins').style.display = 'flex';
 			else if (enemy.health > player.health)
