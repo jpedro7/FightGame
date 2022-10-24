@@ -9,22 +9,43 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             text-align: center;
+            color: white;
         }
         div {
             display: flex;
             justify-content: center;
             align-items: center;
         }
+        #container {
+            position: relative;
+        }
+        #timer-div {
+            width: 100px;
+            height: 100px;
+            background: red;
+            position: absolute;
+            top: 0;
+        }
+        .result-div {
+            position: absolute;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <p>
-        <strong>Controls p1:</strong> A - move left, D - move right, W - jump, S - attack
-    </p>
-    <p>
-        <strong>Controls p2:</strong> Left Arrow - move left, Right Arrow - move right, Upper Arrow - jump, Down Arrow - attack
-    </p>
-    <div>
+    <div id="container">
+        <div id="timer-div">
+            <span id="timer"></span>
+        </div>
+        <div class="result-div" id="player1-wins">
+            <span>Player 1 Wins!</span>
+        </div>
+        <div class="result-div" id="tie">
+            <span>Tie!</span>
+        </div>
+        <div class="result-div" id="player2-wins">
+            <span>Player 2 Wins!</span>
+        </div>
         <canvas></canvas>
     </div>
 </body>

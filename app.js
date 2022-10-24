@@ -13,13 +13,19 @@ import {
 	SPRITE_WIDTH,
 	ATK_BOX_HEIGHT,
 	ATK_OFFSET,
+	CANVAS_WIDTH,
+	CANVAS_HEIGHT,
+	PLAYER_SPRITE,
+	ENEMY_SPRITE,
 } from './constants.js';
+
+let gameOver = false;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = 1024;
-canvas.height = 576;
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -55,7 +61,8 @@ class Sprite {
 			direction: healthBarPosition.direction,
 			width: HEALTH_BAR_WIDTH,
 			height: HEALTH_BAR_HEIGHT,
-		}
+		};
+		this.imune = false;
 	}
 
 	draw() {
@@ -111,50 +118,23 @@ class Sprite {
 			this.isAttacking = false;
 		}, 100);
 	}
-
 }
 
-const player = new Sprite({
-	position: {
-		x: 0,
-		y: canvas.height - SPRITE_HEIGHT,
-	},
-	velocity: {
-		x: 0,
-		y: 0,
-	},
-	color: 'green',
-	offset: {
-		x: 0,
-		y: 0,
-	},
-	healthBarPosition: {
-		x: 0,
-		y: 0,
-		direction: 'left',
-	},
-});
+const player = new Sprite(PLAYER_SPRITE);
+const enemy = new Sprite(ENEMY_SPRITE);
 
-const enemy = new Sprite({
-	position: {
-		x: canvas.width - SPRITE_WIDTH,
-		y: canvas.height - SPRITE_HEIGHT,
-	},
-	velocity: {
-		x: 0,
-		y: 10
-	},
-	color: 'red',
-	offset: {
-		x: ATK_OFFSET,
-		y: 0,
-	},
-	healthBarPosition: {
-		x: canvas.width - HEALTH_BAR_WIDTH,
-		y: 0,
-		direction: 'right',
-	},
-});
+let timer = 30;
+const timerEl = document.querySelector('#timer');
+timerEl.innerHTML = timer;
+function decreaseTimer() {
+	setTimeout(() => {
+		if (timer > 0 && !gameOver) {
+			timer--;
+			timerEl.innerHTML = timer;
+			decreaseTimer();
+		} else gameOver = true;
+	}, 1000);
+}
 
 function animate() {
 	window.requestAnimationFrame(animate);
@@ -166,34 +146,69 @@ function animate() {
 	player.velocity.x = 0;
 	enemy.velocity.x = 0;
 
-	if (KEYS.a.pressed && player.lastKey === 'a') {
-		player.velocity.x = -MOVE_SPEED;
-	} else if (KEYS.d.pressed && player.lastKey === 'd') {
-		player.velocity.x = MOVE_SPEED;
-	}
-
-	if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
-		enemy.velocity.x = -MOVE_SPEED;
-	} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
-		enemy.velocity.x = MOVE_SPEED;
-	}
-
-	if (KEYS.w.pressed && !player.jumpLock) {
-		player.velocity.y = JUMP_FORCE;
-		player.jumpLock = true;
-	} if (KEYS.ArrowUp.pressed && !enemy.jumpLock) {
-		enemy.velocity.y = JUMP_FORCE;
-		enemy.jumpLock = true;
-	}
-
-	if (checkAtk(player, enemy) && player.isAttacking) {
-		player.isAttacking = false;
-		if (enemy.health > 0)
-			enemy.health -= 10;
-	} if (checkAtk(enemy, player) && enemy.isAttacking) {
-		enemy.isAttacking = false;
-		if (player.health > 0)
-			player.health -= 10;
+	if (!gameOver) {
+		if (KEYS.a.pressed && player.lastKey === 'a' && player.position.x >= 0) {
+			player.velocity.x = -MOVE_SPEED;
+		} else if (KEYS.d.pressed && player.lastKey === 'd' && player.position.x + player.width <= canvas.width) {
+			player.velocity.x = MOVE_SPEED;
+		}
+	
+		if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
+			enemy.velocity.x = -MOVE_SPEED;
+		} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
+			enemy.velocity.x = MOVE_SPEED;
+		}
+	
+		if (KEYS.w.pressed && !player.jumpLock) {
+			player.velocity.y = JUMP_FORCE;
+			player.jumpLock = true;
+		} if (KEYS.ArrowUp.pressed && !enemy.jumpLock) {
+			enemy.velocity.y = JUMP_FORCE;
+			enemy.jumpLock = true;
+		}
+	
+		if (checkAtk(player, enemy) && player.isAttacking) {
+			player.isAttacking = false;
+			
+			if (enemy.health > 0 && !enemy.imune) {
+				enemy.health -= 10;
+				enemy.imune = true;
+				setTimeout(() => {
+					enemy.imune = false;
+				}, 250);
+			}
+			
+			if (enemy.health === 0) {
+				gameOver = true;
+				document.querySelector('#player1-wins').style.display = 'flex'
+			}
+		} if (checkAtk(enemy, player) && enemy.isAttacking) {
+			enemy.isAttacking = false;
+	
+			if (player.health > 0 && !player.imune) {
+				player.health -= 10;
+				player.imune = true;
+				setTimeout(() => {
+					player.imune = false;
+				}, 250);
+			}
+			
+			if (player.health === 0) {
+				gameOver = true;
+				document.querySelector('#player2-wins').style.display = 'flex';
+			}
+		}
+	
+		if (timer === 0 && !gameOver) {
+			gameOver = true;
+	
+			if (player.health > enemy.health)
+				document.querySelector('#player1-wins').style.display = 'flex';
+			else if (enemy.health > player.health)
+				document.querySelector('#player2-wins').style.display = 'flex';
+			else
+				document.querySelector('#tie').style.display = 'flex';
+		}
 	}
 
 	if (checkPosition(player, enemy)) {
@@ -209,6 +224,7 @@ function animate() {
 	}
 }
 
+decreaseTimer();
 animate();
 
 window.addEventListener('keydown', event => {
@@ -216,14 +232,14 @@ window.addEventListener('keydown', event => {
 		KEYS[event.key].pressed = true;
 		if (event.key !== 'w' && event.key !== 's') {
 			player.lastKey = event.key;
-		} if (event.key === 's') {
+		} if (event.key === 's' && !gameOver) {
 			player.attack();
 		}
 	} else if (ENEMY_MOVES.includes(event.key)) {
 		KEYS[event.key].pressed = true;
 		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
 			enemy.lastKey = event.key;
-		} if (event.key === 'ArrowDown') {
+		} if (event.key === 'ArrowDown' && !gameOver) {
 			enemy.attack();
 		}
 	}
