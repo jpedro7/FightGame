@@ -153,9 +153,9 @@ function animate() {
 			player.velocity.x = MOVE_SPEED;
 		}
 	
-		if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
+		if (KEYS.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft' && enemy.position.x >= 0) {
 			enemy.velocity.x = -MOVE_SPEED;
-		} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
+		} else if (KEYS.ArrowRight.pressed && enemy.lastKey === 'ArrowRight' && enemy.position.x + enemy.width <= canvas.width) {
 			enemy.velocity.x = MOVE_SPEED;
 		}
 	
