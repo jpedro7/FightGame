@@ -1,17 +1,11 @@
+import { PlayerSprite } from './classes.js';
 import { checkAtk, checkPosition } from './functions.js';
 import {
-	GRAVITY,
 	PLAYER2_MOVES,
 	JUMP_FORCE,
 	KEYS,
 	MOVE_SPEED,
 	PLAYER1_MOVES,
-	HEALTH_BAR_WIDTH,
-	HEALTH_BAR_HEIGHT,
-	ATK_BOX_WIDTH,
-	SPRITE_HEIGHT,
-	SPRITE_WIDTH,
-	ATK_BOX_HEIGHT,
 	ATK_OFFSET,
 	CANVAS_WIDTH,
 	CANVAS_HEIGHT,
@@ -20,126 +14,24 @@ import {
 	KNOCKBACK_X,
 	KNOCKBACK_Y,
 	ATK_DMG,
-	BASE_HEALTH,
 	GAME_TIME,
 } from './constants.js';
 
+let timer = GAME_TIME;
 let gameOver = false;
 
+const timerEl = document.querySelector('#timer');
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
+const player1 = new PlayerSprite(PLAYER1_SPRITE);
+const player2 = new PlayerSprite(PLAYER2_SPRITE);
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
-
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-class Sprite {
-
-	constructor({
-		position,
-		velocity,
-		color = 'red',
-		offset,
-		healthBarPosition
-	}) {
-		this.position = position;
-		this.velocity = velocity;
-		this.height = SPRITE_HEIGHT;
-		this.width = SPRITE_WIDTH;
-		this.jumpLock = false;
-		this.lastKey;
-		this.atkbox = {
-			position: {
-				x: this.position.x,
-				y: this.position.y,
-			},
-			width: ATK_BOX_WIDTH,
-			height: ATK_BOX_HEIGHT,
-			offset: offset,
-		};
-		this.color = color;
-		this.isAttacking = false;
-		this.health = BASE_HEALTH;
-		this.healthBar = {
-			position: healthBarPosition,
-			direction: healthBarPosition.direction,
-			width: HEALTH_BAR_WIDTH,
-			height: HEALTH_BAR_HEIGHT,
-		};
-		this.imune = false;
-		this.moveLock = false;
-	}
-
-	draw() {
-		ctx.fillStyle = this.color;
-		ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-
-		if (this.isAttacking) {
-			ctx.fillStyle = 'yellow';
-			ctx.fillRect(this.atkbox.position.x, this.atkbox.position.y, this.atkbox.width, this.atkbox.height);
-		}
-
-		ctx.fillStyle = 'yellow';
-		ctx.fillRect(this.healthBar.position.x, this.healthBar.position.y, this.healthBar.width, this.healthBar.height);
-
-		ctx.fillStyle = 'red';
-		if (this.healthBar.position.direction === 'left') {
-			ctx.fillRect(
-				this.healthBar.position.x + this.health * HEALTH_BAR_WIDTH / 100,
-				this.healthBar.position.y,
-				this.healthBar.width - this.health * HEALTH_BAR_WIDTH / 100,
-				this.healthBar.height
-			);
-		} else if (this.healthBar.position.direction === 'right') {
-			ctx.fillRect(
-				this.healthBar.position.x,
-				this.healthBar.position.y,
-				this.healthBar.width - this.health * HEALTH_BAR_WIDTH / 100,
-				this.healthBar.height
-			);
-		}
-	}
-
-	update() {
-		this.draw();
-		this.position.y += this.velocity.y;
-		this.position.x += this.velocity.x;
-
-		this.atkbox.position.x = this.position.x - this.atkbox.offset.x;
-		this.atkbox.position.y = this.position.y;
-
-		if (this.position.y + this.height >= canvas.height) {
-			this.position.y = canvas.height - this.height;
-			this.velocity.y = 0;
-			this.jumpLock = false;
-			this.moveLock = false;
-		} else {
-			this.velocity.y += GRAVITY;
-		}
-
-		if (this.position.x <= 0) {
-			this.position.x = 0;
-		} else if (this.position.x >= canvas.width - this.width) {
-			this.position.x = canvas.width - this.width;
-		}
-	}
-
-	attack() {
-		this.isAttacking = true;
-		setTimeout(() => {
-			this.isAttacking = false;
-		}, 100);
-	}
-}
-
-const player1 = new Sprite(PLAYER1_SPRITE);
-const player2 = new Sprite(PLAYER2_SPRITE);
-
-let timer = GAME_TIME;
-const timerEl = document.querySelector('#timer');
-timerEl.innerHTML = timer;
 function decreaseTimer() {
+	timerEl.innerHTML = timer;
 	setTimeout(() => {
 		if (timer > 0 && !gameOver) {
 			timer--;
@@ -154,8 +46,8 @@ function animate() {
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	player1.update();
-	player2.update();
+	player1.update(ctx, canvas);
+	player2.update(ctx, canvas);
 
 	if (!player1.moveLock) player1.velocity.x = 0;
 	if (!player2.moveLock) player2.velocity.x = 0;
@@ -233,6 +125,18 @@ function animate() {
 			}
 		}
 
+		if (checkPosition(player1, player2)) {
+			player1.atkBox.offset.x = ATK_OFFSET;
+		} else {
+			player1.atkBox.offset.x = 0;
+		}
+	
+		if (checkPosition(player2, player1)) {
+			player2.atkBox.offset.x = ATK_OFFSET;
+		} else {
+			player2.atkBox.offset.x = 0;
+		}
+
 		if (timer === 0 && !gameOver) {
 			gameOver = true;
 
@@ -243,18 +147,6 @@ function animate() {
 			else
 				document.querySelector('#tie').style.display = 'flex';
 		}
-	}
-
-	if (checkPosition(player1, player2)) {
-		player1.atkbox.offset.x = ATK_OFFSET;
-	} else {
-		player1.atkbox.offset.x = 0;
-	}
-
-	if (checkPosition(player2, player1)) {
-		player2.atkbox.offset.x = ATK_OFFSET;
-	} else {
-		player2.atkbox.offset.x = 0;
 	}
 }
 

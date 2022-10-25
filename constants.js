@@ -45,8 +45,8 @@ export const KNOCKBACK_Y = 7;
 // Sizes
 export const CANVAS_WIDTH = 1024;
 export const CANVAS_HEIGHT = 576;
-export const SPRITE_WIDTH = 50;
-export const SPRITE_HEIGHT = 150;
+export const PLAYER_WIDTH = 50;
+export const PLAYER_HEIGHT = 150;
 export const HEALTH_BAR_WIDTH = 400;
 export const HEALTH_BAR_HEIGHT = 50;
 export const ATK_BOX_WIDTH = 100;
@@ -57,17 +57,9 @@ export const ATK_OFFSET = 50;
 export const PLAYER1_SPRITE = {
 	position: {
 		x: 50,
-		y: CANVAS_HEIGHT - SPRITE_HEIGHT,
-	},
-	velocity: {
-		x: 0,
-		y: 0,
+		y: CANVAS_HEIGHT - PLAYER_HEIGHT,
 	},
 	color: 'green',
-	offset: {
-		x: 0,
-		y: 0,
-	},
 	healthBarPosition: {
 		x: 0,
 		y: 0,
@@ -76,18 +68,10 @@ export const PLAYER1_SPRITE = {
 }
 export const PLAYER2_SPRITE = {
 	position: {
-		x: CANVAS_WIDTH - SPRITE_WIDTH - 50,
-		y: CANVAS_HEIGHT - SPRITE_HEIGHT,
-	},
-	velocity: {
-		x: 0,
-		y: 10
+		x: CANVAS_WIDTH - PLAYER_WIDTH - 50,
+		y: CANVAS_HEIGHT - PLAYER_HEIGHT,
 	},
 	color: 'red',
-	offset: {
-		x: ATK_OFFSET,
-		y: 0,
-	},
 	healthBarPosition: {
 		x: CANVAS_WIDTH - HEALTH_BAR_WIDTH,
 		y: 0,
