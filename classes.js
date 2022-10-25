@@ -9,7 +9,29 @@ import {
     PLAYER_WIDTH,
 } from "./constants.js";
 
-export class PlayerSprite {
+export class Sprite {
+
+    constructor({
+        position,
+        imageSrc,
+    }) {
+        this.position = position;
+        this.width = PLAYER_WIDTH;
+        this.height = PLAYER_HEIGHT;
+        this.image = new Image();
+        this.image.src = imageSrc;
+    }
+
+    draw(ctx) {
+        ctx.drawImage(this.image, this.position.x, this.position.y);
+    }
+
+    update(ctx) {
+        this.draw(ctx);
+    }
+}
+
+export class Player {
 
     constructor({
         position,

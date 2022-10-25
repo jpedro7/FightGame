@@ -1,4 +1,4 @@
-import { PlayerSprite } from './classes.js';
+import { Player, Sprite } from './classes.js';
 import { checkAtk, checkPosition } from './functions.js';
 import {
 	PLAYER2_MOVES,
@@ -23,8 +23,15 @@ let gameOver = false;
 const timerEl = document.querySelector('#timer');
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
-const player1 = new PlayerSprite(PLAYER1_SPRITE);
-const player2 = new PlayerSprite(PLAYER2_SPRITE);
+const background = new Sprite({
+	position: {
+		x: 0,
+		y: 0,
+	},
+	imageSrc: './assets/background.png',
+});
+const player1 = new Player(PLAYER1_SPRITE);
+const player2 = new Player(PLAYER2_SPRITE);
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
@@ -46,6 +53,7 @@ function animate() {
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	background.update(ctx);
 	player1.update(ctx, canvas);
 	player2.update(ctx, canvas);
 
