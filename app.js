@@ -17,6 +17,11 @@ import {
 	CANVAS_HEIGHT,
 	PLAYER1_SPRITE,
 	PLAYER2_SPRITE,
+	KNOCKBACK_X,
+	KNOCKBACK_Y,
+	ATK_DMG,
+	BASE_HEALTH,
+	GAME_TIME,
 } from './constants.js';
 
 let gameOver = false;
@@ -55,7 +60,7 @@ class Sprite {
 		};
 		this.color = color;
 		this.isAttacking = false;
-		this.health = 100;
+		this.health = BASE_HEALTH;
 		this.healthBar = {
 			position: healthBarPosition,
 			direction: healthBarPosition.direction,
@@ -131,7 +136,7 @@ class Sprite {
 const player1 = new Sprite(PLAYER1_SPRITE);
 const player2 = new Sprite(PLAYER2_SPRITE);
 
-let timer = 30;
+let timer = GAME_TIME;
 const timerEl = document.querySelector('#timer');
 timerEl.innerHTML = timer;
 function decreaseTimer() {
@@ -180,16 +185,16 @@ function animate() {
 			player1.isAttacking = false;
 
 			if (player2.health > 0 && !player2.imune) {
-				player2.health -= 10;
+				player2.health -= ATK_DMG;
 
 				player2.moveLock = true;
 				player2.jumpLock = true;
-				player2.velocity.y = -10;
+				player2.velocity.y = -KNOCKBACK_Y;
 
 				if (checkPosition(player2, player1))
-					player2.velocity.x += 20;
+					player2.velocity.x += KNOCKBACK_X;
 				else
-					player2.velocity.x -= 20;
+					player2.velocity.x -= KNOCKBACK_X;
 
 				player2.imune = true;
 				setTimeout(() => {
@@ -205,16 +210,16 @@ function animate() {
 			player2.isAttacking = false;
 
 			if (player1.health > 0 && !player1.imune) {
-				player1.health -= 10;
+				player1.health -= ATK_DMG;
 
 				player1.moveLock = true;
 				player1.jumpLock = true;
-				player1.velocity.y = -10;
+				player1.velocity.y = -KNOCKBACK_Y;
 
 				if (checkPosition(player1, player2))
-					player1.velocity.x += 20;
+					player1.velocity.x += KNOCKBACK_X;
 				else
-					player1.velocity.x -= 20;
+					player1.velocity.x -= KNOCKBACK_X;
 
 				player1.imune = true;
 				setTimeout(() => {
